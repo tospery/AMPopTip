@@ -15,8 +15,8 @@ func shortCategoryName(_ category: UIContentSizeCategory) -> String {
     return category.rawValue.replacingOccurrences(of: "UICTContentSizeCategory", with: "")
 }
 
-func combinePredicates<T>(_ predicates: [Nimble.Predicate<T>],
-                          deferred: (() -> Void)? = nil) -> Nimble.Predicate<T> {
+func combinePredicates<T>(_ predicates: [Predicate<T>],
+                          deferred: (() -> Void)? = nil) -> Predicate<T> {
     return Predicate { actualExpression in
         defer {
             deferred?()
@@ -31,24 +31,24 @@ func combinePredicates<T>(_ predicates: [Nimble.Predicate<T>],
     }
 }
 
-public func haveValidDynamicTypeSnapshot<T: Snapshotable>(named name: String? = nil,
+public func haveValidDynamicTypeSnapshot(named name: String? = nil,
                                          identifier: String? = nil,
                                          usesDrawRect: Bool = false,
                                          pixelTolerance: CGFloat? = nil,
                                          tolerance: CGFloat? = nil,
                                          sizes: [UIContentSizeCategory] = allContentSizeCategories(),
-                                         isDeviceAgnostic: Bool = false) -> Nimble.Predicate<T> {
+                                         isDeviceAgnostic: Bool = false) -> Predicate<Snapshotable> {
     let mock = NBSMockedApplication()
 
-    let predicates: [Nimble.Predicate<T>] = sizes.map { category in
+    let predicates: [Predicate<Snapshotable>] = sizes.map { category in
         let sanitizedName = sanitizedTestName(name)
         let nameWithCategory = "\(sanitizedName)_\(shortCategoryName(category))"
 
-        return Nimble.Predicate { actualExpression in
+        return Predicate { actualExpression in
             mock.mockPreferredContentSizeCategory(category)
             updateTraitCollection(on: actualExpression)
 
-            let predicate: Nimble.Predicate<T>
+            let predicate: Predicate<Snapshotable>
             if isDeviceAgnostic {
                 predicate = haveValidDeviceAgnosticSnapshot(named: nameWithCategory, identifier: identifier,
                                                             usesDrawRect: usesDrawRect, pixelTolerance: pixelTolerance,
@@ -70,22 +70,22 @@ public func haveValidDynamicTypeSnapshot<T: Snapshotable>(named name: String? = 
     }
 }
 
-public func recordDynamicTypeSnapshot<T: Snapshotable>(named name: String? = nil,
+public func recordDynamicTypeSnapshot(named name: String? = nil,
                                       identifier: String? = nil,
                                       usesDrawRect: Bool = false,
                                       sizes: [UIContentSizeCategory] = allContentSizeCategories(),
-                                      isDeviceAgnostic: Bool = false) -> Nimble.Predicate<T> {
+                                      isDeviceAgnostic: Bool = false) -> Predicate<Snapshotable> {
     let mock = NBSMockedApplication()
 
-    let predicates: [Nimble.Predicate<T>] = sizes.map { category in
+    let predicates: [Predicate<Snapshotable>] = sizes.map { category in
         let sanitizedName = sanitizedTestName(name)
         let nameWithCategory = "\(sanitizedName)_\(shortCategoryName(category))"
 
-        return Nimble.Predicate { actualExpression in
+        return Predicate { actualExpression in
             mock.mockPreferredContentSizeCategory(category)
             updateTraitCollection(on: actualExpression)
 
-            let predicate: Nimble.Predicate<T>
+            let predicate: Predicate<Snapshotable>
             if isDeviceAgnostic {
                 predicate = recordDeviceAgnosticSnapshot(named: nameWithCategory,
                                                          identifier: identifier,
@@ -103,7 +103,7 @@ public func recordDynamicTypeSnapshot<T: Snapshotable>(named name: String? = nil
     }
 }
 
-private func updateTraitCollection<T: Snapshotable>(on expression: Expression<T>) {
+private func updateTraitCollection(on expression: Expression<Snapshotable>) {
     // swiftlint:disable:next force_try force_unwrapping
     let instance = try! expression.evaluate()!
     updateTraitCollection(on: instance)

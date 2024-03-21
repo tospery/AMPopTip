@@ -16,68 +16,62 @@ import Nimble_Snapshots
 let RECORD_SNAPSHOT = false
 
 class PopTipTests: QuickSpec {
-  class func container() -> UIView {
+  let container: UIView = {
     let view = UIView(frame: CGRect(x: 0, y: 0, width: 300, height: 300))
     view.backgroundColor = .white
     return view
-  }
-  
-  class func subject() -> PopTip {
+  }()
+  var subject: PopTip = {
     let popTip = PopTip()
     popTip.entranceAnimation = .none
     popTip.exitAnimation = .none
     return popTip
-  }
+  }()
 
-  override class func spec() {
+  override func spec() {
     describe("showing a text") {
       it("displays correctly on the right") {
-        let container = container()
-        subject().show(text: "Hello", direction: .right, maxWidth: 200, in: container, from: CGRect(x: 50, y: 50, width: 0, height: 0))
+        self.subject.show(text: "Hello", direction: .right, maxWidth: 200, in: self.container, from: CGRect(x: 50, y: 50, width: 0, height: 0))
         if RECORD_SNAPSHOT {
-          expect(container).to(recordSnapshot(named: "right-standard"))
+          expect(self.container).to(recordSnapshot(named: "right-standard"))
         } else {
-          expect(container).to(haveValidSnapshot(named: "right-standard"))
+          expect(self.container).to(haveValidSnapshot(named: "right-standard"))
         }
       }
 
       it("displays correctly on the left") {
-        let container = container()
-        subject().show(text: "Hello", direction: .left, maxWidth: 200, in: container, from: CGRect(x: 250, y: 50, width: 0, height: 0))
+        self.subject.show(text: "Hello", direction: .left, maxWidth: 200, in: self.container, from: CGRect(x: 250, y: 50, width: 0, height: 0))
         if RECORD_SNAPSHOT {
-          expect(container).to(recordSnapshot(named: "left-standard"))
+          expect(self.container).to(recordSnapshot(named: "left-standard"))
         } else {
-          expect(container).to(haveValidSnapshot(named: "left-standard"))
+          expect(self.container).to(haveValidSnapshot(named: "left-standard"))
         }
       }
 
       it("displays correctly up") {
-        let container = container()
-        subject().show(text: "Hello", direction: .up, maxWidth: 200, in: container, from: CGRect(x: 150, y: 150, width: 0, height: 0))
+        self.subject.show(text: "Hello", direction: .up, maxWidth: 200, in: self.container, from: CGRect(x: 150, y: 150, width: 0, height: 0))
         if RECORD_SNAPSHOT {
-          expect(container).to(recordSnapshot(named: "up-standard"))
+          expect(self.container).to(recordSnapshot(named: "up-standard"))
         } else {
-          expect(container).to(haveValidSnapshot(named: "up-standard"))
+          expect(self.container).to(haveValidSnapshot(named: "up-standard"))
         }
       }
 
       it("displays correctly down") {
-        let container = container()
-        subject().show(text: "Hello", direction: .down, maxWidth: 200, in: container, from: CGRect(x: 150, y: 50, width: 0, height: 0))
+        self.subject.show(text: "Hello", direction: .down, maxWidth: 200, in: self.container, from: CGRect(x: 150, y: 50, width: 0, height: 0))
         if RECORD_SNAPSHOT {
-          expect(container).to(recordSnapshot(named: "down-standard"))
+          expect(self.container).to(recordSnapshot(named: "down-standard"))
         } else {
-          expect(container).to(haveValidSnapshot(named: "down-standard"))
+          expect(self.container).to(haveValidSnapshot(named: "down-standard"))
         }
       }
 
       it("displays correctly with no direction") {
-        let container = container()
-        subject().show(text: "Hello", direction: .none, maxWidth: 200, in: container, from: CGRect(x: 150, y: 50, width: 0, height: 0))
+        self.subject.show(text: "Hello", direction: .none, maxWidth: 200, in: self.container, from: CGRect(x: 150, y: 50, width: 0, height: 0))
         if RECORD_SNAPSHOT {
-          expect(container).to(recordSnapshot(named: "none-standard"))
+          expect(self.container).to(recordSnapshot(named: "none-standard"))
         } else {
-          expect(container).to(haveValidSnapshot(named: "none-standard"))
+          expect(self.container).to(haveValidSnapshot(named: "none-standard"))
         }
       }
     }
