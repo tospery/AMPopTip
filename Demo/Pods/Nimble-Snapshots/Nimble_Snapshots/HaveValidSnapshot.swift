@@ -202,14 +202,14 @@ func getTolerance() -> CGFloat {
     return FBSnapshotTest.sharedInstance.tolerance
 }
 
-private func performSnapshotTest(_ name: String?,
+private func performSnapshotTest<T: Snapshotable>(_ name: String?,
                                  identifier: String? = nil,
                                  isDeviceAgnostic: Bool = false,
                                  usesDrawRect: Bool = false,
-                                 actualExpression: Expression<Snapshotable>,
+                                 actualExpression: Expression<T>,
                                  pixelTolerance: CGFloat? = nil,
                                  tolerance: CGFloat?,
-                                 shouldIgnoreScale: Bool) -> PredicateResult {
+                                 shouldIgnoreScale: Bool) -> MatcherResult {
     // swiftlint:disable:next force_try force_unwrapping
     let instance = try! actualExpression.evaluate()!
     let testFileLocation = actualExpression.location.file
@@ -226,16 +226,16 @@ private func performSnapshotTest(_ name: String?,
                                                 filename: filename, identifier: identifier,
                                                 shouldIgnoreScale: shouldIgnoreScale)
 
-    return PredicateResult(status: PredicateStatus(bool: result),
+    return MatcherResult(status: MatcherStatus(bool: result),
                            message: .fail("expected a matching snapshot in \(snapshotName)"))
 }
 
-private func recordSnapshot(_ name: String?,
+private func recordSnapshot<T: Snapshotable>(_ name: String?,
                             identifier: String? = nil,
                             isDeviceAgnostic: Bool = false,
                             usesDrawRect: Bool = false,
-                            actualExpression: Expression<Snapshotable>,
-                            shouldIgnoreScale: Bool) -> PredicateResult {
+                            actualExpression: Expression<T>,
+                            shouldIgnoreScale: Bool) -> MatcherResult {
     // swiftlint:disable:next force_try force_unwrapping
     let instance = try! actualExpression.evaluate()!
     let testFileLocation = actualExpression.location.file
@@ -265,7 +265,7 @@ private func recordSnapshot(_ name: String?,
         message = "expected to record a snapshot"
     }
 
-    return PredicateResult(status: PredicateStatus(bool: false),
+    return MatcherResult(status: MatcherStatus(bool: false),
                            message: .fail(message))
 }
 
@@ -275,14 +275,14 @@ private func currentTestName() -> String? {
 
 internal var switchChecksWithRecords = false
 
-public func haveValidSnapshot(named name: String? = nil,
+public func haveValidSnapshot<T: Snapshotable>(named name: String? = nil,
                               identifier: String? = nil,
                               usesDrawRect: Bool = false,
                               pixelTolerance: CGFloat? = nil,
                               tolerance: CGFloat? = nil,
-                              shouldIgnoreScale: Bool = false) -> Predicate<Snapshotable> {
+                              shouldIgnoreScale: Bool = false) -> Nimble.Matcher<T> {
 
-    return Predicate { actualExpression in
+    return Matcher { actualExpression in
         if switchChecksWithRecords {
             return recordSnapshot(name,
                                   identifier: identifier,
@@ -301,14 +301,14 @@ public func haveValidSnapshot(named name: String? = nil,
     }
 }
 
-public func haveValidDeviceAgnosticSnapshot(named name: String? = nil,
+public func haveValidDeviceAgnosticSnapshot<T: Snapshotable>(named name: String? = nil,
                                             identifier: String? = nil,
                                             usesDrawRect: Bool = false,
                                             pixelTolerance: CGFloat? = nil,
                                             tolerance: CGFloat? = nil,
-                                            shouldIgnoreScale: Bool = false) -> Predicate<Snapshotable> {
+                                            shouldIgnoreScale: Bool = false) -> Nimble.Matcher<T> {
 
-    return Predicate { actualExpression in
+    return Matcher { actualExpression in
         if switchChecksWithRecords {
             return recordSnapshot(name,
                                   identifier: identifier,
@@ -329,24 +329,24 @@ public func haveValidDeviceAgnosticSnapshot(named name: String? = nil,
     }
 }
 
-public func recordSnapshot(named name: String? = nil,
+public func recordSnapshot<T: Snapshotable>(named name: String? = nil,
                            identifier: String? = nil,
                            usesDrawRect: Bool = false,
-                           shouldIgnoreScale: Bool = false) -> Predicate<Snapshotable> {
+                           shouldIgnoreScale: Bool = false) -> Nimble.Matcher<T> {
 
-    return Predicate { actualExpression in
+    return Matcher { actualExpression in
         return recordSnapshot(name, identifier: identifier, usesDrawRect: usesDrawRect,
                               actualExpression: actualExpression,
                               shouldIgnoreScale: shouldIgnoreScale)
     }
 }
 
-public func recordDeviceAgnosticSnapshot(named name: String? = nil,
+public func recordDeviceAgnosticSnapshot<T: Snapshotable>(named name: String? = nil,
                                          identifier: String? = nil,
                                          usesDrawRect: Bool = false,
-                                         shouldIgnoreScale: Bool = false) -> Predicate<Snapshotable> {
+                                         shouldIgnoreScale: Bool = false) -> Nimble.Matcher<T> {
 
-    return Predicate { actualExpression in
+    return Matcher { actualExpression in
         return recordSnapshot(name, identifier: identifier, isDeviceAgnostic: true, usesDrawRect: usesDrawRect,
                               actualExpression: actualExpression,
                               shouldIgnoreScale: shouldIgnoreScale)

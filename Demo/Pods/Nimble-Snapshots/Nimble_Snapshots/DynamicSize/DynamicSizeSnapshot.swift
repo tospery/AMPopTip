@@ -145,7 +145,7 @@ public func snapshot(_ name: String? = nil,
     return DynamicSizeSnapshot(name: name, identifier: identifier, record: false, sizes: sizes, resizeMode: resizeMode)
 }
 
-public func haveValidDynamicSizeSnapshot(named name: String? = nil,
+public func haveValidDynamicSizeSnapshot<T: Snapshotable>(named name: String? = nil,
                                          identifier: String? = nil,
                                          sizes: [String: CGSize],
                                          isDeviceAgnostic: Bool = false,
@@ -153,8 +153,8 @@ public func haveValidDynamicSizeSnapshot(named name: String? = nil,
                                          pixelTolerance: CGFloat? = nil,
                                          tolerance: CGFloat? = nil,
                                          resizeMode: ResizeMode = .frame,
-                                         shouldIgnoreScale: Bool = false) -> Predicate<Snapshotable> {
-    return Predicate { actualExpression in
+                                         shouldIgnoreScale: Bool = false) -> Nimble.Matcher<T> {
+    return Matcher { actualExpression in
         return performDynamicSizeSnapshotTest(name,
                                               identifier: identifier,
                                               sizes: sizes,
@@ -169,17 +169,17 @@ public func haveValidDynamicSizeSnapshot(named name: String? = nil,
     }
 }
 
-func performDynamicSizeSnapshotTest(_ name: String?,
+func performDynamicSizeSnapshotTest<T: Snapshotable>(_ name: String?,
                                     identifier: String? = nil,
                                     sizes: [String: CGSize],
                                     isDeviceAgnostic: Bool = false,
                                     usesDrawRect: Bool = false,
-                                    actualExpression: Expression<Snapshotable>,
+                                    actualExpression: Expression<T>,
                                     tolerance: CGFloat? = nil,
                                     pixelTolerance: CGFloat? = nil,
                                     isRecord: Bool,
                                     resizeMode: ResizeMode,
-                                    shouldIgnoreScale: Bool = false) -> PredicateResult {
+                                    shouldIgnoreScale: Bool = false) -> MatcherResult {
     // swiftlint:disable:next force_try force_unwrapping
     let instance = try! actualExpression.evaluate()!
     let testFileLocation = actualExpression.location.file
@@ -222,17 +222,17 @@ func performDynamicSizeSnapshotTest(_ name: String?,
             message = "expected to record a snapshot in \(name)"
         }
 
-        return PredicateResult(status: PredicateStatus(bool: false),
+        return MatcherResult(status: MatcherStatus(bool: false),
                                message: .fail(message))
     } else {
         var message: String = ""
         if !result.filter({ !$0 }).isEmpty {
             message = "expected a matching snapshot in \(snapshotName)"
-            return PredicateResult(status: PredicateStatus(bool: false),
+            return MatcherResult(status: MatcherStatus(bool: false),
                                    message: .fail(message))
         }
 
-        return PredicateResult(status: PredicateStatus(bool: true),
+        return MatcherResult(status: MatcherStatus(bool: true),
                                message: .fail(message))
     }
 }
@@ -244,14 +244,14 @@ public func recordSnapshot(_ name: String? = nil,
     return DynamicSizeSnapshot(name: name, identifier: identifier, record: true, sizes: sizes, resizeMode: resizeMode)
 }
 
-public func recordDynamicSizeSnapshot(named name: String? = nil,
+public func recordDynamicSizeSnapshot<T: Snapshotable>(named name: String? = nil,
                                       identifier: String? = nil,
                                       sizes: [String: CGSize],
                                       isDeviceAgnostic: Bool = false,
                                       usesDrawRect: Bool = false,
                                       resizeMode: ResizeMode = .frame,
-                                      shouldIgnoreScale: Bool = false) -> Predicate<Snapshotable> {
-    return Predicate { actualExpression in
+                                      shouldIgnoreScale: Bool = false) -> Nimble.Matcher<T> {
+    return Matcher { actualExpression in
         return performDynamicSizeSnapshotTest(name,
                                               identifier: identifier,
                                               sizes: sizes,
@@ -264,7 +264,7 @@ public func recordDynamicSizeSnapshot(named name: String? = nil,
     }
 }
 
-public func == (lhs: Expectation<Snapshotable>, rhs: DynamicSizeSnapshot) {
+public func ==(lhs: Nimble.SyncExpectation<Snapshotable>, rhs: DynamicSizeSnapshot) {
     if rhs.record {
         lhs.to(recordDynamicSizeSnapshot(named: rhs.name,
                                          identifier: rhs.identifier,
@@ -275,5 +275,19 @@ public func == (lhs: Expectation<Snapshotable>, rhs: DynamicSizeSnapshot) {
                                             identifier: rhs.identifier,
                                             sizes: rhs.sizes,
                                             resizeMode: rhs.resizeMode))
+    }
+}
+
+public func ==(lhs: Nimble.AsyncExpectation<Snapshotable>, rhs: DynamicSizeSnapshot) async {
+    if rhs.record {
+        await lhs.to(recordDynamicSizeSnapshot(named: rhs.name,
+                                               identifier: rhs.identifier,
+                                               sizes: rhs.sizes,
+                                               resizeMode: rhs.resizeMode))
+    } else {
+        await lhs.to(haveValidDynamicSizeSnapshot(named: rhs.name,
+                                                  identifier: rhs.identifier,
+                                                  sizes: rhs.sizes,
+                                                  resizeMode: rhs.resizeMode))
     }
 }
